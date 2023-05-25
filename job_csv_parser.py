@@ -1,5 +1,7 @@
 from job import Job
+from job_iterator import JobIterator
 import csv
+import pandas as pd
 
 csv_file = 'jobs_and_networking.csv'
 
@@ -17,5 +19,8 @@ with open(csv_file, 'r') as file:
             last_requirement = row[2]
         if row[3]:
             job.add_sub_requirement(job_requirement=last_requirement, sub_requirement=row[3])
-
+    job_iterator = JobIterator(jobs)
+    keywords_dict = job_iterator.common_keywords()
+    df = pd.DataFrame(keywords_dict)
+    print(df)
 
