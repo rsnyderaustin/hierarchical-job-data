@@ -39,19 +39,34 @@ def test_combine_requirements(create_job_iterator):
 def test_common_keywords(create_job_iterator):
     keyword_tally = create_job_iterator.common_keywords()
     expected_output = {
-        ('Python', 1): {
-            ('Python Pandas', 1),
-            ('Python Testing', 1)
+        'Python': {
+            'count': 2,
+            'Python Pandas': {
+                'count': 2,
+                'Python Pandas Testing': {
+                    'count': 1
+                }
+            }
         },
-        ('Communication', 2): {
-            ('Communication Presentations', 1)
+        'Communication': {
+            'count': 2,
+            'Communication Presentations': {
+                'count': 1
+            }
         },
         ('C#', 2): {
-            ('C# Testing', 1)
+            'count': 2,
+            'C# Testing': {
+                'count': 1
+            }
+            ('C# Testing', 1),
+            ('C# Testing Structure', 1)
         },
         ('Tableau', 1): {},
         ('SQL', 1): {},
+        ('Pandas', 1): {}
     }
+
     assert keyword_tally == expected_output
 
 

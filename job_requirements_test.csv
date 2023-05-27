@@ -1,6 +1,6 @@
 Company,Position,Job Requirement,Sub-Requirement
-Company A,Software Engineer,Python,Pandas
-,,,Testing
+Company A,Software Engineer,Python Pandas,Testing
+,,,
 ,,Communication,Presentations
 ,,C#,
 ,,,
@@ -8,3 +8,5 @@ Company B,Data Analyst,Tableau,
 ,,SQL,
 Company C,Manager,Communication,
 ,,C#,Testing Structure
+,,Pandas,
+,,Python,Pandas
