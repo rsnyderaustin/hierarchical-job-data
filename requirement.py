@@ -1,20 +1,21 @@
 
 class Requirement:
-    def __init__(self, phrase :str):
-        self.phrase = phrase
+    def __init__(self, requirement: str):
+        self.requirement = requirement
         self.count = 1
         self.subrequirements: dict[Requirement] = {}
+        self.subquery_iterations = 0
 
     def increment_count(self):
         self.count += 1
 
     def add_subrequirement(self, subrequirement):
-        self.subrequirements[subrequirement.phrase] = subrequirement
+        self.subrequirements[subrequirement.requirement] = subrequirement
 
-    def check_subrequirement(self, new_phrase: str):
-        def is_valid_subrequirement(new_phrase):
-            requirement_words = self.phrase.split()
-            subrequirement_words = new_phrase.split()
+    def process_as_subrequirement(self, new_requirement: str) -> bool:
+        def is_valid_subrequirement(new_requirement):
+            requirement_words = self.requirement.split()
+            subrequirement_words = new_requirement.split()
 
             if len(requirement_words) + 1 != len(subrequirement_words):
                 return False
@@ -23,26 +24,23 @@ class Requirement:
                 if requirement_words[i] != subrequirement_words[i]:
                     return False
             return True
-        if is_valid_subrequirement(new_phrase):
-            new_phrase_is_current_subrequirement = False
-            for subrequirement in self.subrequirements.values():
-                if new_phrase == subrequirement.phrase:
-                    self.subrequirements[new_phrase].increment_count()
+        if is_valid_subrequirement(new_requirement):
+            new_requirement_is_current_subrequirement = False
+            for subrequirement in self.subrequirements.keys():
+                if new_requirement == subrequirement:
+                    self.subrequirements[new_requirement].increment_count()
                     new_phrase_is_current_subrequirement = True
-            if not new_phrase_is_current_subrequirement:
-                self.add_subrequirement(Requirement(phrase=new_phrase))
+            if not new_requirement_is_current_subrequirement:
+                self.add_subrequirement(Requirement(requirement=new_requirement))
+            return True
         else:
-            for subrequirement in self.subrequirements.values():
-                if subrequirement.phrase in new_phrase:
-                    subrequirement.check_subrequirement(new_phrase)
+            for subrequirement in self.subrequirements:
+                if subrequirement in new_requirement:
+                    self.subrequirements[subrequirement].process_as_subrequirement(new_requirement)
+        return False
 
-    def print_requirements(self):
-        print(f"{self.phrase}, count: {self.count}")
+    def print_requirements(self, iterations):
+        print('\t' * iterations + f"{self.requirement}, count: {self.count}")
+        iterations += 1
         for subrequirement in self.subrequirements.values():
-            subrequirement.print_subrequirements()
-
-    def print_subrequirements(self):
-        for subrequirement in self.subrequirements.values():
-            print(f"{subrequirement.phrase}, count: {subrequirement.count}")
-            subrequirement.print_subrequirements()
-
+            subrequirement.print_requirements(iterations)

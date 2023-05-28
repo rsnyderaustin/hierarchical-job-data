@@ -36,62 +36,65 @@ class JobIterator:
     def common_keywords(self):
         # Returns a list of strings from a phrase formatted:
         # 'Python Pandas Testing' -> ['Python', 'Python Pandas', 'Python Pandas Testing']
-        def split_requirement_phrase(requirement: str, subrequirement: str, requirement_has_been_processed: bool) -> list:
+        def expand_single_requirement(requirement: str, subrequirement: str,
+                                      requirement_has_been_processed: bool) -> list:
             split_requirement = requirement.split()
             expanded_requirement = []
             if not requirement_has_been_processed:
                 for index in range(0, len(split_requirement)):
-                    expanded_requirement.append(' '.join(split_requirement[0:index+1]))
+                    expanded_requirement.append(' '.join(split_requirement[0:index + 1]))
 
             combined_requirements = split_requirement.copy()
             combined_requirements.extend(subrequirement.split())
 
             start = len(split_requirement) + 1
-            stop = len(combined_requirements)
+            stop = len(combined_requirements) + 1
             for i in range(start, stop):
                 expanded_requirement.append(' '.join(combined_requirements[0:i]))
             return expanded_requirement
 
-        # 'Python Pandas Testing' -> ['Python', 'Python Pandas', 'Python Pandas Testing'] for each query, subquery pair
-        def create_expanded_phrases(requirement: str, subrequirements: list):
-            split_phrases = []
-            if len(subrequirements) > 0:
+        def requirement_has_subrequirements(subrequirements):
+            return len(subrequirements) > 0
+
+        # Requirement and subrequirements management
+        def expand_requirement(requirement: str, subrequirements: list):
+            expanded_requirements = []
+            if requirement_has_subrequirements(subrequirements):
                 requirement_has_been_processed = False
                 for i, subrequirement in enumerate(subrequirements):
                     if i > 0:
                         requirement_has_been_processed = True
-                    split_requirements = split_requirement_phrase(requirement, subrequirement,
-                                                                  requirement_has_been_processed)
-                    split_phrases.append(split_requirements)
+                    expanded_requirement = expand_single_requirement(requirement, subrequirement,
+                                                                      requirement_has_been_processed)
+                    expanded_requirements.append(expanded_requirement)
 
             else:
-                # If there are no subrequirements, only analyze the requirement
-                split_phrases.append(split_requirement_phrase(requirement, '', False))
+                split_requirement = expand_single_requirement(requirement, subrequirement='',
+                                                              requirement_has_been_processed=False)
+                expanded_requirements.append(split_requirement)
 
-            expanded_phrases = []
-            for split_phrase in split_phrases:
-                for i in range(len(split_phrase)):
-                    for j in range(i + 1):
-                        expanded_phrases.append(' '.join(split_phrase[0:j + 1]))
-            return expanded_phrases
+            return expanded_requirements
+
+        # Main function begins here
         if len(self.jobs) > 0:
             for job in self.jobs:
-                new_phrases = []
-                for requirement_phrase in job.job_requirements.keys():
-                    new_expanded_phrase = create_expanded_phrases(requirement_phrase,
-                                                                  job.job_requirements[requirement_phrase])
-                    new_phrases.append(new_expanded_phrase)
-                for job_phrases in new_phrases:
-                    for phrase in job_phrases:
+                agg_expanded_requirements = []
+                for primary_requirement in job.job_requirements.keys():
+                    expanded_requirements = expand_requirement(primary_requirement,
+                                                          job.job_requirements[primary_requirement])
+                    for expanded_requirement in expanded_requirements:
+                        agg_expanded_requirements.append(expanded_requirement)
+                for expanded_job_requirement in agg_expanded_requirements:
+                    for requirement in expanded_job_requirement:
                         processed = False
-                        for requirement in self.requirements.values():
-                            if phrase == requirement.phrase:
-                                self.requirements[phrase].increment_count()
+                        for processed_requirement in self.requirements:
+                            if requirement == processed_requirement:
+                                self.requirements[requirement].increment_count()
                                 processed = True
-                            elif requirement.phrase in phrase:
-                                requirement.check_subrequirement(phrase)
-                                processed = True
+                            elif processed_requirement in requirement:
+                                if self.requirements[processed_requirement].process_as_subrequirement(requirement):
+                                    processed = True
                         if not processed:
-                                self.requirements[phrase] = Requirement(phrase=phrase)
+                            self.requirements[requirement] = Requirement(requirement=requirement)
         for requirement in self.requirements.values():
-            requirement.print_requirements()
+            requirement.print_requirements(iterations=0)
