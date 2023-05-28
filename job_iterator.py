@@ -57,19 +57,21 @@ class JobIterator:
             return len(subrequirements) > 0
 
         # Requirement and subrequirements management
-        def expand_requirement(requirement: str, subrequirements: list):
+        def expand_requirement(primary_and_sub_requirements: tuple):
             expanded_requirements = []
+            primary_requirement = primary_and_sub_requirements[0]
+            subrequirements = primary_and_sub_requirements[1]
             if requirement_has_subrequirements(subrequirements):
                 requirement_has_been_processed = False
                 for i, subrequirement in enumerate(subrequirements):
                     if i > 0:
                         requirement_has_been_processed = True
-                    expanded_requirement = expand_single_requirement(requirement, subrequirement,
+                    expanded_requirement = expand_single_requirement(primary_requirement, subrequirement,
                                                                       requirement_has_been_processed)
                     expanded_requirements.append(expanded_requirement)
 
             else:
-                split_requirement = expand_single_requirement(requirement, subrequirement='',
+                split_requirement = expand_single_requirement(primary_requirement, subrequirement='',
                                                               requirement_has_been_processed=False)
                 expanded_requirements.append(split_requirement)
 
@@ -79,13 +81,11 @@ class JobIterator:
         if len(self.jobs) > 0:
             for job in self.jobs:
                 agg_expanded_requirements = []
-                for primary_requirement in job.job_requirements.keys():
-                    expanded_requirements = expand_requirement(primary_requirement,
-                                                          job.job_requirements[primary_requirement])
+                for primary_and_sub_requirements in job.job_requirements.items():
+                    expanded_requirements = expand_requirement(primary_and_sub_requirements)
                     for expanded_requirement in expanded_requirements:
                         agg_expanded_requirements.append(expanded_requirement)
                 for expanded_job_requirement in agg_expanded_requirements:
-                    iteration_index = -1
                     for requirement in expanded_job_requirement:
                         processed = False
                         for processed_requirement in self.requirements:

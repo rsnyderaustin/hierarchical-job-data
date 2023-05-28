@@ -29,7 +29,7 @@ class Requirement:
             for subrequirement in self.subrequirements.keys():
                 if new_requirement == subrequirement:
                     self.subrequirements[new_requirement].increment_count()
-                    new_phrase_is_current_subrequirement = True
+                    new_requirement_is_current_subrequirement = True
             if not new_requirement_is_current_subrequirement:
                 self.add_subrequirement(Requirement(requirement=new_requirement))
             return True

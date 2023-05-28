@@ -18,7 +18,9 @@ class Job:
             self.job_requirements = {}
 
     def add_job_requirement(self, job_requirement: str):
-        self.job_requirements[job_requirement] = []
+        if job_requirement not in self.job_requirements.keys():
+            self.job_requirements[job_requirement] = []
+
 
     def add_sub_requirement(self, job_requirement: str, sub_requirement: str):
         try:
