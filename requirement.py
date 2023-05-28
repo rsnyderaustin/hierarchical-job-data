@@ -36,7 +36,8 @@ class Requirement:
         else:
             for subrequirement in self.subrequirements:
                 if subrequirement in new_requirement:
-                    self.subrequirements[subrequirement].process_as_subrequirement(new_requirement)
+                    if self.subrequirements[subrequirement].process_as_subrequirement(new_requirement):
+                        return True
         return False
 
     def print_requirements(self, iterations):

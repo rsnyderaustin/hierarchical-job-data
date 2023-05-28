@@ -85,6 +85,7 @@ class JobIterator:
                     for expanded_requirement in expanded_requirements:
                         agg_expanded_requirements.append(expanded_requirement)
                 for expanded_job_requirement in agg_expanded_requirements:
+                    iteration_index = -1
                     for requirement in expanded_job_requirement:
                         processed = False
                         for processed_requirement in self.requirements:
